@@ -1,0 +1,57 @@
+def activation_function(input):
+	threshold = 0
+	if input > threshold :
+		return 1
+	elif input < -threshold : 	
+		return -1
+	else :
+		return input
+
+def calc_net_input(data, weights, bias):
+	netInput = 0
+	for i in range(len(data)-1) :
+		netInput += data[i] * weights[i]
+	netInput += bias
+	return netInput
+
+def update_weights(data, weights, learning_rate, target_output):
+	for i in range(len(weights)) :
+		weights[i] += (learning_rate * target_output * data[i])
+	return weights
+
+
+def train_perceptron(dataset, learning_rate, weights, bias):
+	
+	for i in range(len(dataset))  :
+		input = calc_net_input(dataset[i], weights, bias)
+		print("Input ", input)
+		actual_output = activation_function(input)
+		target_output = dataset[i][2]
+		print(target_output,input,actual_output)
+		if target_output != actual_output :
+
+			#print("target Output", target_output)
+			weights = update_weights(dataset[i], weights, learning_rate, target_output)
+			#print("Weights ", weights)
+			bias = update_bias(bias, target_output, learning_rate)
+	return weights, bias
+
+def update_bias(bias, target_output, learning_rate):
+	bias  += (learning_rate * target_output)
+	return bias
+
+dataset = [ [1, 1, 1],
+	      	[1, -1, -1],
+	      	[-1, 1, -1],
+	      	[-1, -1, -1] ]
+
+epochs = 2
+learning_rate = 1
+weights = [0, 0]
+bias = 0
+for i in range(epochs) :
+	weights, bias = train_perceptron( dataset, learning_rate, weights, bias )
+	print(weights)
+	print(bias)
+	#bias = update_bias(bias, target_output, learning_rate)
+
