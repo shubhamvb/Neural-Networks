@@ -24,7 +24,7 @@ def train_perceptron(dataset, learning_rate, weights, bias):
 	
 	for i in range(len(dataset))  :
 		input = calc_net_input(dataset[i], weights, bias)
-		print("Input ", input)
+		
 		actual_output = activation_function(input)
 		target_output = dataset[i][2]
 		print(target_output,input,actual_output)
