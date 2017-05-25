@@ -1,3 +1,5 @@
+from csv import reader
+
 def activation_function(input):
 	threshold = 0
 	if input > threshold :
@@ -39,6 +41,18 @@ def train_perceptron(dataset, learning_rate, weights, bias):
 def update_bias(bias, target_output, learning_rate):
 	bias  += (learning_rate * target_output)
 	return bias
+
+def load_csv_file(filename):
+	dataset = list()
+	with open(filename, 'r') as f:
+		file_reader = reader(f)
+		for row in file_reader:
+			if not row:
+				continue
+			dataset.append(row)
+	return dataset
+
+	
 
 dataset = [ [1, 1, 1],
 	      	[1, -1, -1],
