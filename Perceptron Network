@@ -1,13 +1,22 @@
 from csv import reader
 
+def load_csv_file(filename):
+	dataset = list()
+	with open(filename, 'r') as f:
+		file_reader = reader(f)
+		for row in file_reader:
+			if not row:
+				continue
+			dataset.append(row)
+	return dataset
+
 def activation_function(input):
 	threshold = 0
-	if input > threshold :
+	if input >= threshold :
 		return 1
-	elif input < -threshold : 	
-		return -1
-	else :
-		return input
+	elif input < threshold : 	
+		return 0
+	
 
 def calc_net_input(data, weights, bias):
 	netInput = 0
@@ -21,50 +30,91 @@ def update_weights(data, weights, learning_rate, target_output):
 		weights[i] += (learning_rate * target_output * data[i])
 	return weights
 
-
-def train_perceptron(dataset, learning_rate, weights, bias):
-	
-	for i in range(len(dataset))  :
-		input = calc_net_input(dataset[i], weights, bias)
-		
-		actual_output = activation_function(input)
-		target_output = dataset[i][2]
-		print(target_output,input,actual_output)
-		if target_output != actual_output :
-
-			#print("target Output", target_output)
-			weights = update_weights(dataset[i], weights, learning_rate, target_output)
-			#print("Weights ", weights)
-			bias = update_bias(bias, target_output, learning_rate)
-	return weights, bias
-
 def update_bias(bias, target_output, learning_rate):
 	bias  += (learning_rate * target_output)
 	return bias
 
-def load_csv_file(filename):
-	dataset = list()
-	with open(filename, 'r') as f:
-		file_reader = reader(f)
-		for row in file_reader:
-			if not row:
-				continue
-			dataset.append(row)
-	return dataset
+def train_perceptron(dataset, learning_rate, weights, bias):
 	
+	target_output_col = len(dataset[0]) - 1
+	for i in range(len(dataset))  :
+		if i % 3 != 0:
+			input = calc_net_input(dataset[i], weights, bias)
+			#print("Input ", input)
+			actual_output = activation_function(input)
+			target_output = dataset[i][target_output_col]
+			#print(target_output,input,actual_output)
+			#if target_output != actual_output :
 
-dataset = [ [1, 1, 1],
+				#print("target Output", target_output)
+				#weights = update_weights(dataset[i], weights, learning_rate, target_output)
+			weights = update_weights(dataset[i], weights, learning_rate, target_output-actual_output)
+				#print("Weights ", weights)
+			bias = update_bias(bias, target_output-actual_output, learning_rate)
+	return weights, bias
+
+def evaluate_perceptron(dataset, learning_rate, weights, bias):
+	
+	target_output_col = len(dataset[0]) - 1
+	count = 0;
+	match = 0;
+	for i in range(len(dataset))  :
+		if i % 3 == 0:
+			count += 1
+			input = calc_net_input(dataset[i], weights, bias)
+			#print("Input ", input)
+			actual_output = activation_function(input)
+			target_output = dataset[i][target_output_col]
+			#print(target_output,input,actual_output)
+			if target_output == actual_output :
+				match += 1;
+	
+	#return match			
+	return match*100/count;
+
+def convert_str_to_float(dataset, col):
+	for row in dataset:
+		row[col] = float(row[col].strip())
+	#return dataset
+
+def convert_str_to_int(dataset, col):
+	labels = [row[col] for row in dataset]
+	unique_labels = set(labels)
+	hashmap = dict()
+	for i,label in enumerate(unique_labels):
+		hashmap[label] = i
+	for row in dataset:
+		row[col] = hashmap[row[col]]
+
+
+filename = "sonar.all-data.csv"
+dataset = load_csv_file(filename)
+'''dataset = [ [1, 1, 1],
 	      	[1, -1, -1],
 	      	[-1, 1, -1],
 	      	[-1, -1, -1] ]
+'''
+for col in range(len(dataset[0])-1):
+	convert_str_to_float(dataset, col)
 
-epochs = 2
-learning_rate = 1
-weights = [0, 0]
-bias = 0
+convert_str_to_int(dataset, len(dataset[0])-1)
+
+epochs = 500
+learning_rate = 0.01
+weights = [0.0 for i in range(len( dataset[0])-1)]
+bias = 0.0
 for i in range(epochs) :
+	#print(weights)
+	#print(bias)
 	weights, bias = train_perceptron( dataset, learning_rate, weights, bias )
-	print(weights)
-	print(bias)
+	#print(weights)
+	#print(bias)
 	#bias = update_bias(bias, target_output, learning_rate)
+#print(weights, len(weights))
+#print bias
+#print(len(dataset[0]))
+match = evaluate_perceptron( dataset, learning_rate, weights, bias )
+print("Match",match)
 
+#for row in dataset:
+	#print row[-1]
