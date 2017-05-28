@@ -1,4 +1,5 @@
 from csv import reader
+from random import shuffle
 
 def load_csv_file(filename):
 	dataset = list()
@@ -25,57 +26,41 @@ def calc_net_input(data, weights, bias):
 	netInput += bias
 	return netInput
 
-def update_weights(data, weights, learning_rate, target_output):
+def update_weights(data, weights, learning_rate, error):
 	for i in range(len(weights)) :
-		weights[i] += (learning_rate * target_output * data[i])
+		weights[i] += (learning_rate * error * data[i])
 	return weights
 
 def update_bias(bias, target_output, learning_rate):
 	bias  += (learning_rate * target_output)
 	return bias
 
-def train_perceptron(dataset, learning_rate, weights, bias):
-	
+def train_perceptron_model(dataset, learning_rate, weights, bias):
 	target_output_col = len(dataset[0]) - 1
-	for i in range(len(dataset))  :
-		if i % 3 != 0:
+	for i in range(len(dataset)):
 			input = calc_net_input(dataset[i], weights, bias)
-			#print("Input ", input)
 			actual_output = activation_function(input)
 			target_output = dataset[i][target_output_col]
-			#print(target_output,input,actual_output)
-			#if target_output != actual_output :
-
-				#print("target Output", target_output)
-				#weights = update_weights(dataset[i], weights, learning_rate, target_output)
 			weights = update_weights(dataset[i], weights, learning_rate, target_output-actual_output)
-				#print("Weights ", weights)
 			bias = update_bias(bias, target_output-actual_output, learning_rate)
+	
 	return weights, bias
 
-def evaluate_perceptron(dataset, learning_rate, weights, bias):
-	
+def evaluate_perceptron_model(dataset, learning_rate, weights, bias):
 	target_output_col = len(dataset[0]) - 1
-	count = 0;
-	match = 0;
-	for i in range(len(dataset))  :
-		if i % 3 == 0:
-			count += 1
-			input = calc_net_input(dataset[i], weights, bias)
-			#print("Input ", input)
-			actual_output = activation_function(input)
-			target_output = dataset[i][target_output_col]
-			#print(target_output,input,actual_output)
-			if target_output == actual_output :
-				match += 1;
-	
-	#return match			
-	return match*100/count;
+	match = 0
+	for i in range(len(dataset)):
+		input = calc_net_input(dataset[i], weights, bias)
+		actual_output = activation_function(input)
+		target_output = dataset[i][target_output_col]
+		if target_output == actual_output:
+			match += 1;
+			
+	return match*100/len(dataset)
 
 def convert_str_to_float(dataset, col):
 	for row in dataset:
 		row[col] = float(row[col].strip())
-	#return dataset
 
 def convert_str_to_int(dataset, col):
 	labels = [row[col] for row in dataset]
@@ -86,35 +71,30 @@ def convert_str_to_int(dataset, col):
 	for row in dataset:
 		row[col] = hashmap[row[col]]
 
-
+'''loading data from csv '''
 filename = "sonar.all-data.csv"
 dataset = load_csv_file(filename)
-'''dataset = [ [1, 1, 1],
-	      	[1, -1, -1],
-	      	[-1, 1, -1],
-	      	[-1, -1, -1] ]
-'''
+
 for col in range(len(dataset[0])-1):
 	convert_str_to_float(dataset, col)
 
 convert_str_to_int(dataset, len(dataset[0])-1)
 
-epochs = 500
-learning_rate = 0.01
-weights = [0.0 for i in range(len( dataset[0])-1)]
+'''Creating the training and test dataset '''
+shuffle(dataset)
+training_set_length = int(len(dataset) * 0.7)
+train_set = dataset[:training_set_length]
+test_set = dataset[training_set_length :]
+
+
+epochs = 100
+learning_rate = 0.1
+weights = [0.1 for i in range(len( dataset[0])-1)]
 bias = 0.0
 for i in range(epochs) :
-	#print(weights)
-	#print(bias)
-	weights, bias = train_perceptron( dataset, learning_rate, weights, bias )
-	#print(weights)
-	#print(bias)
-	#bias = update_bias(bias, target_output, learning_rate)
-#print(weights, len(weights))
-#print bias
-#print(len(dataset[0]))
-match = evaluate_perceptron( dataset, learning_rate, weights, bias )
-print("Match",match)
+	weights, bias = train_perceptron_model( train_set, learning_rate, weights, bias )
+	
+	
+match = evaluate_perceptron_model( test_set, learning_rate, weights, bias )
+print("Prediction Accuracy :- ",match)
 
-#for row in dataset:
-	#print row[-1]
