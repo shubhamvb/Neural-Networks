@@ -11,6 +11,7 @@ def load_csv_file(filename):
 			dataset.append(row)
 	return dataset
 
+
 def activation_function(input):
 	threshold = 0
 	if input >= threshold :
