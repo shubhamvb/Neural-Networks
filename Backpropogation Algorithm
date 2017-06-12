@@ -1,1 +1,14 @@
 /**/
+
+def convert_str_to_float(dataset, col):
+	for row in dataset:
+		row[col] = float(row[col].strip())
+
+def convert_str_to_int(dataset, col):
+	labels = [row[col] for row in dataset]
+	unique_labels = set(labels)
+	hashmap = dict()
+	for i,label in enumerate(unique_labels):
+		hashmap[label] = i
+	for row in dataset:
+		row[col] = hashmap[row[col]]
